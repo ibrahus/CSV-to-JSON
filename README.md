@@ -28,3 +28,18 @@ You can now run the worker by executing our program with the worker argument:
 ```bash
 celery -A app.celery worker --loglevel=INFO
 ```
+
+### Endpoint
+#### GET /csv-to-json
+- Returns a the top rated prodcut and success value.
+- Example response:
+```
+{
+    "data": {
+        "product_rating": 4.9,
+        "top_product": "Ibrahim gift card"
+    },
+    "success": true
+}
+```
+
