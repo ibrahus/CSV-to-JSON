@@ -47,7 +47,7 @@ def hello_world():
 # Endpoint that recive a CSV file of products and return JSON response of the top rated product
 
 
-@flask_app.route("/csv-to-json", methods=['GET', 'POST'])
+@flask_app.route("/csv-to-json", methods=['GET'])
 def csv_to_json():
     # Check if no file is uploaded, if not retun 400
     if not request.files:
