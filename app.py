@@ -100,12 +100,12 @@ def csv_to_json():
     if request.method == 'POST':
         """ Call convert_to_json_task to run the task in background
          and retrun task ID, task status in the response"""
-        top_rating_dict = convert_to_json_task.delay(str_data)
+        top_rating_task = convert_to_json_task.delay(str_data)
 
         return jsonify({
             'success': True,
-            'task_id': top_rating_dict.id,
-            'task_status': top_rating_dict.status,
+            'task_id': top_rating_task.id,
+            'task_status': top_rating_task.status,
         }), 202
 
     if request.method == 'GET':
