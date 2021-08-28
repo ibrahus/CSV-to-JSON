@@ -29,7 +29,7 @@ You can now run the worker by executing our program with the worker argument:
 celery -A app.celery worker --loglevel=INFO
 ```
 
-### Endpoint
+### Endpoints
 #### GET /csv-to-json
 - Returns a the top rated prodcut and success value.
 - Example response:
@@ -42,4 +42,14 @@ celery -A app.celery worker --loglevel=INFO
     "success": true
 }
 ```
-
+#### POST /csv-to-json
+- Run the task in background and use RabbitMQ message broker.
+- Return success value, task ID, task status and 202 accepted response status code.
+- Example response:
+```
+{
+    "success": true,
+    "task_id": "63861fe6-233e-4808-89fe-ac17fae739ac",
+    "task_status": "PENDING"
+}
+```
