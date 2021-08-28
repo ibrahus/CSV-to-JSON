@@ -18,6 +18,25 @@ celery = make_celery(flask_app)
 
 
 @celery.task
+def convert_to_json_task(data):
+    buff = io.StringIO(data)
+    output = []
+    reader = csv.DictReader(buff)
+    for line in reader:
+        output.append(line)
+
+    df = pd.DataFrame(output)
+    df['customer_average_rating'] = pd.to_numeric(
+        df['customer_average_rating'])
+    top_rating = df.iloc[df['customer_average_rating'].idxmax()]
+    top_rating_dict = {
+        'top_product': top_rating['product_name'],
+        'product_rating': top_rating['customer_average_rating']
+    }
+
+    return top_rating_dict
+
+
 def convert_to_json(data):
     buff = io.StringIO(data)
     output = []
@@ -47,7 +66,7 @@ def hello_world():
 # Endpoint that recive a CSV file of products and return JSON response of the top rated product
 
 
-@flask_app.route("/csv-to-json", methods=['GET'])
+@flask_app.route("/csv-to-json", methods=['GET', 'POST'])
 def csv_to_json():
     # Check if no file is uploaded, if not retun 400
     if not request.files:
@@ -72,11 +91,28 @@ def csv_to_json():
     data = file.read()
     # Convert it to String
     str_data = data.decode('utf-8')
+    if str_data == '':
+        return jsonify({
+            'success': False,
+            'message': 'The file is empty',
+        }), 415
 
-    # Call convert_to_json in background
-    top_rating_dict = convert_to_json.delay(str_data)
+    if request.method == 'POST':
+        """ Call convert_to_json_task to run the task in background
+         and retrun task ID, task status in the response"""
+        top_rating_dict = convert_to_json_task.delay(str_data)
 
-    return jsonify({
-        'success': True,
-        'data': top_rating_dict.wait(),
-    })
+        return jsonify({
+            'success': True,
+            'task_id': top_rating_dict.id,
+            'task_status': top_rating_dict.status,
+        }), 202
+
+    if request.method == 'GET':
+        # Call convert_to_json that a will return a json response of the top rated prodcut
+        top_rating_dict = convert_to_json(str_data)
+
+        return jsonify({
+            'success': True,
+            'data': top_rating_dict,
+        })

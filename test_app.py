@@ -13,7 +13,7 @@ class CSVtoJSONTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    def test_csv_to_json(self):
+    def test_GET_csv_to_json(self):
         with open('csv_example.csv', 'rb') as file:
             data = {
                 'file': file
@@ -22,6 +22,16 @@ class CSVtoJSONTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json['success'], True)
         self.assertEqual(res.content_type, 'application/json')
+
+    def test_POST_csv_to_json(self):
+        with open('csv_example.csv', 'rb') as file:
+            data = {
+                'file': file
+            }
+            res = self.client().post("/csv-to-json", data=data)
+        self.assertEqual(res.status_code, 202)
+        self.assertEqual(res.json['success'], True)
+        self.assertIn('task_id', res.json)
 
     def test_upload_non_csv_failed(self):
         data = {
