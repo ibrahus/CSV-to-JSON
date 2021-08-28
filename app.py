@@ -6,7 +6,6 @@ import pandas as pd
 from tasks import make_celery
 
 
-# def create_app():
 flask_app = Flask(__name__)
 
 # We configure Celery’s RabbitMQ broker and RPC backend
