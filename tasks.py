@@ -1,6 +1,14 @@
 from celery import Celery
 
 
+"""
+The function creates a new Celery object, 
+configures it with the broker from the application config, 
+updates the rest of the Celery config from the Flask config
+ and then creates a subclass of the task that wraps the task execution in an application context.
+ """
+
+
 def make_celery(app):
     celery = Celery(
         app.import_name,

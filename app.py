@@ -8,6 +8,8 @@ from tasks import make_celery
 
 # def create_app():
 flask_app = Flask(__name__)
+
+# We configure Celery’s RabbitMQ broker and RPC backend
 flask_app.config.update(
     CELERY_BROKER_URL='pyamqp://guest@localhost//',
     CELERY_RESULT_BACKEND='rpc://'
@@ -43,55 +45,39 @@ CORS(flask_app)
 def hello_world():
     return jsonify('Healthy')
 
+# Endpoint that recive a CSV file of products and return JSON response of the top rated product
+
 
 @flask_app.route("/csv-to-json", methods=['GET', 'POST'])
 def csv_to_json():
-    print('')
+    # Check if no file is uploaded, if not retun 400
     if not request.files:
         return jsonify({
             'success': False,
             'message': 'There is no file, please import a CSV file',
         }), 400
-    # get the file
+
+    """ If the file is uploaded, we will get the first file from the request object instead
+    of getting the file by name """
+
     file = list(request.files.values())[0]
 
+    # Check if the file uploaded is a CSV file, if not return 415
     if file.content_type not in 'text/csv':
         return jsonify({
             'success': False,
             'message': 'The file is not in CSV format. Please upload a CSV file',
         }), 415
 
+    # Read the file
     data = file.read()
-
+    # Convert it to String
     str_data = data.decode('utf-8')
+
+    # Call convert_to_json in background
     top_rating_dict = convert_to_json.delay(str_data)
-
-    # buff = io.StringIO(str_data)
-
-    # output = []
-    # reader = csv.DictReader(buff)
-    # for line in reader:
-    #     output.append(line)
-
-    # df = pd.DataFrame(output)
-    # df['customer_average_rating'] = pd.to_numeric(
-    #     df['customer_average_rating'])
-    # top_rating = df.iloc[df['customer_average_rating'].idxmax()]
-    # top_rating_dict = {
-    #     'top_product': top_rating['product_name'],
-    #     'product_rating': top_rating['customer_average_rating']
-    # }
 
     return jsonify({
         'success': True,
         'data': top_rating_dict.wait(),
     })
-
-
-#     return flask_app
-
-
-# flask_app = create_app()
-
-# if __name__ == '__main__':
-#     flask_app.run(host='0.0.0.0', port=8080, debug=True)

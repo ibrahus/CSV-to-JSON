@@ -13,14 +13,6 @@ class CSVtoJSONTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    def test_health(self):
-        res = self.client().get("/")
-
-        data = json.loads(res.data)
-        # self.assertEqual(len(data['questions']), 1)
-        # self.assertTrue(data['categories'])
-        self.assertEqual(res.status_code, 200)
-
     def test_csv_to_json(self):
         with open('csv_example.csv', 'rb') as file:
             data = {
